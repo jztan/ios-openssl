@@ -4,16 +4,21 @@
 # OpenSSL ${OPENSSL_VERSION} for iOS 7.0 that contains code for
 # armv6, armv7, arm7s and i386.
 
-set -x
-
 # Setup paths to stuff we need
-
-OPENSSL_VERSION="1.0.1e"
-
-DEVELOPER="/Applications/Xcode.app/Contents/Developer"
-
-SDK_VERSION="7.0"
+OPENSSL_VERSION="0.9.8y"
+SDK_VERSION="7.1"
 MIN_VERSION="4.3"
+
+set -e
+if [ ! -e openssl-${OPENSSL_VERSION}.tar.gz ]; then
+	echo "Downloading openssl-${OPENSSL_VERSION}.tar.gz"
+    curl -O http://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+else
+	echo "Using openssl-${OPENSSL_VERSION}.tar.gz"
+fi
+
+set -x
+DEVELOPER=`xcode-select -print-path`
 
 IPHONEOS_PLATFORM="${DEVELOPER}/Platforms/iPhoneOS.platform"
 IPHONEOS_SDK="${IPHONEOS_PLATFORM}/Developer/SDKs/iPhoneOS${SDK_VERSION}.sdk"
@@ -76,7 +81,7 @@ build()
    perl -i -pe 's|static volatile sig_atomic_t intr_signal|static volatile int intr_signal|' crypto/ui/ui_openssl.c
    perl -i -pe "s|^CC= gcc|CC= ${GCC} -arch ${ARCH} -miphoneos-version-min=${MIN_VERSION}|g" Makefile
    perl -i -pe "s|^CFLAG= (.*)|CFLAG= -isysroot ${SDK} \$1|g" Makefile
-   make &> "/tmp/openssl-${OPENSSL_VERSION}-${ARCH}.build-log"
+   make -j4 &> "/tmp/openssl-${OPENSSL_VERSION}-${ARCH}.build-log"
    make install &> "/tmp/openssl-${OPENSSL_VERSION}-${ARCH}.install-log"
    popd
    rm -rf "openssl-${OPENSSL_VERSION}"
