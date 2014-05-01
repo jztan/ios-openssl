@@ -99,6 +99,7 @@ mkdir include
 cp -r /tmp/openssl-${OPENSSL_VERSION}-i386/include/openssl include/
 
 mkdir lib
+ln -s lib lib64
 lipo \
 	"/tmp/openssl-${OPENSSL_VERSION}-armv7/lib/libcrypto.a" \
 	"/tmp/openssl-${OPENSSL_VERSION}-armv7s/lib/libcrypto.a" \
